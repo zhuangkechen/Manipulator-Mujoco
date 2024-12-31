@@ -16,3 +16,8 @@ register(
     # max_episode_steps=300,
     # TODO: Uncomment the above line if you want to set a maximum episode step limit
 )
+
+register(
+    id="manipulator_mujoco/SO100Env-v0",
+    entry_point="manipulator_mujoco.envs:SO100Env",
+)
