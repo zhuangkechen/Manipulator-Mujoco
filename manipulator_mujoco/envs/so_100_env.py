@@ -52,8 +52,8 @@ class SO100Env(gym.Env):
             eef_site_name='eef_site',
             attachment_site_name='attachment_site'
         )
-        # # small box to be manipulated
-        # self._box = Primitive(type="box", size=[0.02, 0.02, 0.02], pos=[0,0,0.02], rgba=[1, 0, 0, 1], friction=[1, 0.3, 0.0001])
+        # small box to be manipulated
+        self._box = Primitive(type="box", size=[0.02, 0.02, 0.02], pos=[0,0,0.02], rgba=[1, 0, 0, 1], friction=[1, 0.3, 0.0001])
 
 
         # attach arm to arena
@@ -63,10 +63,10 @@ class SO100Env(gym.Env):
             quat=[0.7071068, 0, 0, -0.7071068]
         )
         
-        # # attach box to arena as free joint
-        # self._arena.attach_free(
-        #     self._box.mjcf_model, pos=[0.5,0,0]
-        # )
+        # attach box to arena as free joint
+        self._arena.attach_free(
+            self._box.mjcf_model, pos=[0.5,0,0]
+        )
        
         # generate model
         self._physics = mjcf.Physics.from_mjcf_model(self._arena.mjcf_model)
