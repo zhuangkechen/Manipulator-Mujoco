@@ -6,7 +6,7 @@ import mujoco.viewer
 import gymnasium as gym
 from gymnasium import spaces
 from manipulator_mujoco.arenas import StandardArena
-from manipulator_mujoco.robots import Arm
+from manipulator_mujoco.robots import Arm, SoArm
 from manipulator_mujoco.props import Primitive
 from manipulator_mujoco.mocaps import Target
 from manipulator_mujoco.controllers import OperationalSpaceController
@@ -21,7 +21,7 @@ class SO100Env(gym.Env):
     def __init__(self, render_mode=None):
         # TODO come up with an observation space that makes sense
         self.observation_space = spaces.Box(
-            low=-np.inf, high=np.inf, shape=(6,), dtype=np.float64
+            low=-np.inf, high=np.inf, shape=(7,), dtype=np.float64
         )
 
         # TODO come up with an action space that makes sense
@@ -43,7 +43,7 @@ class SO100Env(gym.Env):
         self._target = Target(self._arena.mjcf_model)
 
         # ur5e arm
-        self._arm = Arm(
+        self._arm = SoArm(
             xml_path= os.path.join(
                 os.path.dirname(__file__),
                 # '../assets/robots/so_100/so_100.xml',
@@ -53,7 +53,7 @@ class SO100Env(gym.Env):
             attachment_site_name='attachment_site'
         )
         # small box to be manipulated
-        self._box = Primitive(type="box", size=[0.02, 0.02, 0.02], pos=[0,0,0.02], rgba=[1, 0, 0, 1], friction=[1, 0.3, 0.0001])
+        self._box = Primitive(type="box", size=[0.02, 0.02, 0.02], pos=[-0.8,0,0.02], rgba=[1, 0, 0, 1], friction=[1, 0.3, 0.0001])
 
 
         # attach arm to arena
@@ -125,9 +125,34 @@ class SO100Env(gym.Env):
 
         # get mocap target pose
         target_pose = self._target.get_mocap_pose(self._physics)
+        # actuators = self._arm.get_actuators(self._physics)
+        # print(action)
+        if action is not None and len(action) == 8:
+            if np.all(action == 0):
+                pass
+            else:
+                # p = target_pose[:3] + action[:3]
+                # q = target_pose[3:7] + action[3:7]
+                p = action[:3]
+                q = action[3:7]
+                a = action[7]
+                print(action)
+                self._target.set_mocap_pose(self._physics, position=p, quaternion=q)
+                # self._arm.set_actuators(self._physics, action=a)
 
         # run OSC controller to move to target pose
         self._controller.run(target_pose)
+        
+        if action is not None and len(action) == 8:
+            if np.all(action == 0):
+                pass
+            else:
+                # p = target_pose[:3] + action[:3]
+                # q = target_pose[3:7] + action[3:7]
+                p = action[:3]
+                q = action[3:7]
+                a = action[7]
+                self._arm.set_actuators(self._physics, action=a)
 
         # step physics
         self._physics.step()
